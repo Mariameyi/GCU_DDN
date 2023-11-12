@@ -1,0 +1,199 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+// Comparable interface for comparing SalableProducts based on name
+interface Comparable<T> {
+    int compareTo(T other);
+}
+
+// SalableProduct class
+class SalableProduct implements Comparable<SalableProduct> {
+    private int productId;
+    private String name;
+    private double price;
+
+    public SalableProduct(int productId, String name, double price) {
+        this.productId = productId;
+        this.name = name;
+        this.price = price;
+    }
+
+    public int getProductId() {
+        return productId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    // Implementing compareTo based on name
+    @Override
+    public int compareTo(SalableProduct other) {
+        return this.name.compareToIgnoreCase(other.getName());
+    }
+}
+
+// AbstractWeapon class extending SalableProduct
+abstract class AbstractWeapon extends SalableProduct {
+    private int damage;
+
+    public AbstractWeapon(int productId, String name, double price, int damage) {
+        super(productId, name, price);
+        this.damage = damage;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+}
+
+// Sword class extending AbstractWeapon
+class Sword extends AbstractWeapon {
+    private int sharpness;
+
+    public Sword(int productId, String name, double price, int damage, int sharpness) {
+        super(productId, name, price, damage);
+        this.sharpness = sharpness;
+    }
+
+    public int getSharpness() {
+        return sharpness;
+    }
+}
+
+// Gun class extending AbstractWeapon
+class Gun extends AbstractWeapon {
+    private String caliber;
+
+    public Gun(int productId, String name, double price, int damage, String caliber) {
+        super(productId, name, price, damage);
+        this.caliber = caliber;
+    }
+
+    public String getCaliber() {
+        return caliber;
+    }
+}
+
+// InventoryManager class
+class InventoryManager {
+    private List<SalableProduct> inventory;
+
+    public InventoryManager() {
+        this.inventory = new ArrayList<>();
+    }
+
+    public void initializeInventory() {
+        // Initialize the inventory (populate with initial products)
+        // For simplicity, we'll add a few products manually
+        inventory.add(new Sword(1, "Steel Sword", 29.99, 15, 5));
+        inventory.add(new Gun(2, "Handgun", 49.99, 10, "9mm"));
+    }
+
+    public void removeProduct(SalableProduct product) {
+        inventory.remove(product);
+    }
+
+    public void addProduct(SalableProduct product) {
+        inventory.add(product);
+    }
+
+    public List<SalableProduct> getInventory() {
+        return Collections.unmodifiableList(inventory);
+    }
+}
+
+// ShoppingCart class
+class ShoppingCart {
+    private List<SalableProduct> cartItems;
+
+    public ShoppingCart() {
+        this.cartItems = new ArrayList<>();
+    }
+
+    public void addProduct(SalableProduct product) {
+        cartItems.add(product);
+    }
+
+    public void removeProduct(SalableProduct product) {
+        cartItems.remove(product);
+    }
+
+    public List<SalableProduct> getCartContents() {
+        return Collections.unmodifiableList(cartItems);
+    }
+
+    public void emptyCart() {
+        cartItems.clear();
+    }
+}
+
+// StoreFrontApplication class
+public class StoreFrontApplication {
+    private InventoryManager inventoryManager;
+    private ShoppingCart shoppingCart;
+
+    public StoreFrontApplication() {
+        this.inventoryManager = new InventoryManager();
+        this.shoppingCart = new ShoppingCart();
+    }
+
+    public void startUp() {
+        // Initialize the inventory when the store starts up
+        inventoryManager.initializeInventory();
+    }
+
+    public void displayInventory() {
+        // Display the store inventory
+        List<SalableProduct> inventory = inventoryManager.getInventory();
+        for (SalableProduct product : inventory) {
+            System.out.println("Product ID: " + product.getProductId() +
+                    ", Name: " + product.getName() +
+                    ", Price: $" + product.getPrice());
+        }
+    }
+
+    public void purchaseProduct(SalableProduct product) {
+        // Add the product to the shopping cart and remove it from the inventory
+        shoppingCart.addProduct(product);
+        inventoryManager.removeProduct(product);
+    }
+
+    public void cancelPurchase(SalableProduct product) {
+        // Remove the product from the shopping cart and add it back to the inventory
+        shoppingCart.removeProduct(product);
+        inventoryManager.addProduct(product);
+    }
+
+    public void displayShoppingCart() {
+        // Display the contents of the shopping cart
+        List<SalableProduct> cartContents = shoppingCart.getCartContents();
+        for (SalableProduct product : cartContents) {
+            System.out.println("Product ID: " + product.getProductId() +
+                    ", Name: " + product.getName() +
+                    ", Price: $" + product.getPrice());
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        StoreFrontApplication storeFront = new StoreFrontApplication();
+        storeFront.startUp();
+        storeFront.displayInventory();
+
+        // Simulate a user purchasing a product
+        SalableProduct productToPurchase = storeFront.inventoryManager.getInventory().get(0);
+        storeFront.purchaseProduct(productToPurchase);
+        storeFront.displayShoppingCart();
+
+        // Simulate a user canceling a purchase
+        SalableProduct productToCancel = storeFront.shoppingCart.getCartContents().get(0);
+        storeFront.cancelPurchase(productToCancel);
+        storeFront.displayShoppingCart();
+    }
+}
